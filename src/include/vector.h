@@ -7,11 +7,19 @@
 #include <string.h>  // NOLINT
 
 #define DECLARE_VECTOR(type_name, type)                                                       \
-    struct vector_##type_name;                                                                \
+    struct vector_##type_name {                                                               \
+        type *data;                                                                           \
+        size_t size;                                                                          \
+        size_t capacity;                                                                      \
+    };                                                                                        \
                                                                                               \
     void vector_##type_name##_init(struct vector_##type_name *const vector);                  \
                                                                                               \
     bool vector_##type_name##_is_empty(struct vector_##type_name const *const vector);        \
+                                                                                              \
+    size_t vector_##type_name##_len(struct vector_##type_name const *const vector);           \
+                                                                                              \
+    size_t vector_##type_name##_cap(struct vector_##type_name const *const vector);           \
                                                                                               \
     type *vector_##type_name##_at(struct vector_##type_name const *const vector, size_t n);   \
                                                                                               \
@@ -40,11 +48,6 @@
 
 
 #define IMPLEMENT_VECTOR(type_name, type)                                                      \
-    struct vector_##type_name {                                                                \
-        type *data;                                                                            \
-        size_t size;                                                                           \
-        size_t capacity;                                                                       \
-    };                                                                                         \
                                                                                                \
     void vector_##type_name##_init(struct vector_##type_name *const vector) {                  \
         vector->data = NULL;                                                                   \
@@ -79,9 +82,8 @@
         struct vector_##type_name const *const src) {                                          \
         bool const ok = vector_##type_name##_reserve(dst, src->size);                          \
         if (!ok) { return false; }                                                             \
-        memcpy(dst->data, src->data, src->size); /* NOLINT */                                  \
+        memcpy(dst->data, src->data, sizeof(type) * src->size); /* NOLINT */                   \
         dst->size = src->size;                                                                 \
-        dst->capacity = src->size;                                                             \
         return true;                                                                           \
     }                                                                                          \
     bool vector_##type_name##_equal(struct vector_##type_name const *const left,               \
@@ -114,6 +116,17 @@
         }                                                                                      \
         --vector->size;                                                                        \
         return vector->data + vector->size;                                                    \
+    }                                                                                          \
+    size_t vector_##type_name##_len(struct vector_##type_name const *const vector) {           \
+        return vector->size;                                                                   \
+    }                                                                                          \
+                                                                                               \
+    size_t vector_##type_name##_cap(struct vector_##type_name const *const vector) {           \
+        return vector->capacity;                                                               \
+    }                                                                                          \
+    type *vector_##type_name##_last(struct vector_##type_name *const vector) {                 \
+        return vector->data + vector->size - 1U;                                               \
     }
+
 
 #endif
