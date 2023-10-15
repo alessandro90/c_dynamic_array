@@ -1,3 +1,7 @@
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
 #include "assert.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,6 +18,15 @@ static void build_test(void) {
     vector_i32_init(&v);
 
     assert(vector_i32_is_empty(&v));
+    assert(vector_i32_len(&v) == 0);
+    assert(vector_i32_cap(&v) == 0);
+
+    vector_i32_free(&v);
+}
+
+static void build_make_test(void) {
+    struct vector_i32 v = vector_i32_make();
+
     assert(vector_i32_is_empty(&v));
     assert(vector_i32_len(&v) == 0);
     assert(vector_i32_cap(&v) == 0);
@@ -21,9 +34,20 @@ static void build_test(void) {
     vector_i32_free(&v);
 }
 
-static void push_test(void) {
+static void capacity_test(void) {
     struct vector_i32 v;
     vector_i32_init(&v);
+
+    size_t const n = 10;
+    vector_i32_reserve(&v, n);
+
+    assert(vector_i32_cap(&v) == n);
+
+    vector_i32_free(&v);
+}
+
+static void push_test(void) {
+    struct vector_i32 v = vector_i32_make();
 
     int32_t const x = 3;
     vector_i32_push(&v, &x);
@@ -223,7 +247,9 @@ static void for_each_test(void) {
     vector_i32_push_by_value(&v, d);
 
     int32_t sum = 0;
-    FOR_EACH_VECTOR_ITEM(i32, int32_t const, v, item) {
+    for (int32_t const *item = vector_i32_begin(&v);
+         item != vector_i32_end(&v);
+         ++item) {
         sum += *item;
     }
     assert(sum == a + b + c + d);
@@ -231,15 +257,56 @@ static void for_each_test(void) {
     vector_i32_free(&v);
 }
 
+static void swap_test(void) {
+    struct vector_i32 v;
+    vector_i32_init(&v);
+
+    struct vector_i32 v_clone;
+    vector_i32_init(&v_clone);
+
+    struct vector_i32 w;
+    vector_i32_init(&w);
+
+    struct vector_i32 w_clone;
+    vector_i32_init(&w_clone);
+
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+    vector_i32_push_by_value(&v, 4);
+
+    vector_i32_clone(&v_clone, &v);
+
+    vector_i32_push_by_value(&w, 10);  // NOLINT
+    vector_i32_push_by_value(&w, 20);  // NOLINT
+    vector_i32_push_by_value(&w, 30);  // NOLINT
+    vector_i32_push_by_value(&w, 40);  // NOLINT
+
+    vector_i32_clone(&w_clone, &w);
+
+    vector_i32_swap(&v, &w);
+
+    assert(vector_i32_equal(&v, &w_clone));
+    assert(vector_i32_equal(&w, &v_clone));
+
+    vector_i32_free(&v);
+    vector_i32_free(&v_clone);
+    vector_i32_free(&w);
+    vector_i32_free(&w_clone);
+}
+
 int main(void) {
     build_test();
+    build_make_test();
     push_test();
+    capacity_test();
     at_test();
     push_by_value_test();
     clone_test();
     equal_test();
     last_test();
     pop_test();
+    swap_test();
     for_each_test();
     return 0;
 }
