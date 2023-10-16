@@ -300,19 +300,107 @@ static void swap_test(void) {
     vector_i32_free(&w_clone);
 }
 
+// NOLINTNEXTLINE
+static void resize_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+
+    assert(vector_i32_resize(&v, 4));
+
+    assert(vector_i32_len(&v) == 4);
+    assert(*vector_i32_at(&v, 0) == 1);
+    assert(*vector_i32_at(&v, 1) == 2);
+    assert(*vector_i32_at(&v, 2) == 0);
+    assert(*vector_i32_at(&v, 3) == 0);
+
+    assert(vector_i32_resize(&v, 1));
+    assert(vector_i32_len(&v) == 1);
+    assert(*vector_i32_at(&v, 0) == 1);
+
+    vector_i32_free(&v);
+}
+
+// NOLINTNEXTLINE
+static void shrink_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+
+    assert(vector_i32_resize(&v, 10));
+
+    assert(vector_i32_len(&v) == 10);
+    assert(vector_i32_cap(&v) == 10);
+
+    (void)vector_i32_pop(&v);
+    (void)vector_i32_pop(&v);
+    (void)vector_i32_pop(&v);
+    (void)vector_i32_pop(&v);
+
+    assert(vector_i32_len(&v) == 6);
+    assert(vector_i32_cap(&v) == 10);
+
+    assert(vector_i32_shrink(&v));
+
+    assert(vector_i32_cap(&v) == 6);
+
+    vector_i32_free(&v);
+}
+
+static void erase_at_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+    vector_i32_push_by_value(&v, 4);
+
+    vector_i32_erase_at(&v, 2);
+
+    assert(vector_i32_len(&v) == 3);
+
+    assert(*vector_i32_at(&v, 0) == 1);
+    assert(*vector_i32_at(&v, 1) == 2);
+    assert(*vector_i32_at(&v, 2 == 4));
+
+    vector_i32_free(&v);
+}
+
+static void from_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+    vector_i32_push_by_value(&v, 4);
+
+    struct Maybe_vector_i32 maybew = vector_i32_from(&v);
+
+    assert(maybew.has_value);
+    assert(vector_i32_equal(&v, &maybew.value));
+
+    vector_i32_free(&v);
+    vector_i32_free(&maybew.value);
+}
+
 DECLARE_VECTOR(of_vectors, struct vector_i32)
 IMPLEMENT_VECTOR(of_vectors, struct vector_i32)
 
 static void matrix_test(void) {
     struct vector_of_vectors m = vector_of_vectors_make(&vector_i32_free);
 
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+
+    struct Maybe_vector_i32 w = vector_i32_from(&v);
+    assert(w.has_value);
+
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
-    vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
+    vector_of_vectors_push_by_value(&m, w.value);
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
 
-    vector_i32_push_by_value(vector_of_vectors_at(&m, 0), 3);
+    assert(vector_i32_equal(vector_of_vectors_at(&m, 1), &v));
 
     vector_of_vectors_free(&m);
+    vector_i32_free(&v);
 }
 
 int main(void) {
@@ -328,6 +416,10 @@ int main(void) {
     pop_test();
     swap_test();
     for_each_test();
+    resize_test();
+    shrink_test();
+    erase_at_test();
+    from_test();
     matrix_test();
     return 0;
 }
