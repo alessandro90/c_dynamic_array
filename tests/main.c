@@ -15,7 +15,7 @@ IMPLEMENT_VECTOR(i32, int32_t)
 
 static void build_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     assert(vector_i32_is_empty(&v));
     assert(vector_i32_len(&v) == 0);
@@ -25,7 +25,7 @@ static void build_test(void) {
 }
 
 static void build_make_test(void) {
-    struct vector_i32 v = vector_i32_make();
+    struct vector_i32 v = vector_i32_make(NULL);
 
     assert(vector_i32_is_empty(&v));
     assert(vector_i32_len(&v) == 0);
@@ -36,7 +36,7 @@ static void build_make_test(void) {
 
 static void capacity_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     size_t const n = 10;
     vector_i32_reserve(&v, n);
@@ -46,25 +46,30 @@ static void capacity_test(void) {
     vector_i32_free(&v);
 }
 
+// NOLINTNEXTLINE
 static void push_test(void) {
-    struct vector_i32 v = vector_i32_make();
+    struct vector_i32 v = vector_i32_make(NULL);
 
     int32_t const x = 3;
     vector_i32_push(&v, &x);
     assert(vector_i32_len(&v) == 1);
+    assert(vector_i32_cap(&v) == 1);
     vector_i32_push(&v, &x);
     assert(vector_i32_len(&v) == 2);
+    assert(vector_i32_cap(&v) == 2);
     vector_i32_push(&v, &x);
     assert(vector_i32_len(&v) == 3);
+    assert(vector_i32_cap(&v) == 4);
     vector_i32_push(&v, &x);
     assert(vector_i32_len(&v) == 4);
+    assert(vector_i32_cap(&v) == 4);
 
     vector_i32_free(&v);
 }
 
 static void push_by_value_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     vector_i32_push_by_value(&v, 1);
     vector_i32_push_by_value(&v, 2);
@@ -88,7 +93,7 @@ static void push_by_value_test(void) {
 
 static void at_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     {
         int32_t const x = 1;
@@ -120,13 +125,13 @@ static void at_test(void) {
 
 static void clone_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     vector_i32_push_by_value(&v, 1);
     vector_i32_push_by_value(&v, 2);
 
     struct vector_i32 w;
-    vector_i32_init(&w);
+    vector_i32_init(&w, NULL);
 
     assert(vector_i32_clone(&w, &v));
 
@@ -140,10 +145,10 @@ static void clone_test(void) {
 static void equal_test(void) {
     {
         struct vector_i32 v;
-        vector_i32_init(&v);
+        vector_i32_init(&v, NULL);
 
         struct vector_i32 w;
-        vector_i32_init(&w);
+        vector_i32_init(&w, NULL);
 
         vector_i32_push_by_value(&v, 1);
         vector_i32_push_by_value(&v, 2);
@@ -157,10 +162,10 @@ static void equal_test(void) {
     }
     {
         struct vector_i32 v;
-        vector_i32_init(&v);
+        vector_i32_init(&v, NULL);
 
         struct vector_i32 w;
-        vector_i32_init(&w);
+        vector_i32_init(&w, NULL);
 
         vector_i32_push_by_value(&v, 1);
         vector_i32_push_by_value(&v, 2);
@@ -175,10 +180,10 @@ static void equal_test(void) {
     }
     {
         struct vector_i32 v;
-        vector_i32_init(&v);
+        vector_i32_init(&v, NULL);
 
         struct vector_i32 w;
-        vector_i32_init(&w);
+        vector_i32_init(&w, NULL);
 
         vector_i32_push_by_value(&v, 1);
         vector_i32_push_by_value(&v, 2);
@@ -194,7 +199,7 @@ static void equal_test(void) {
 
 static void last_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     vector_i32_push_by_value(&v, 1);
     vector_i32_push_by_value(&v, 2);
@@ -206,7 +211,7 @@ static void last_test(void) {
 
 static void pop_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     vector_i32_push_by_value(&v, 1);
     vector_i32_push_by_value(&v, 2);
@@ -235,7 +240,7 @@ static void pop_test(void) {
 
 static void for_each_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     int32_t const a = 1;
     int32_t const b = 2;
@@ -259,16 +264,16 @@ static void for_each_test(void) {
 
 static void swap_test(void) {
     struct vector_i32 v;
-    vector_i32_init(&v);
+    vector_i32_init(&v, NULL);
 
     struct vector_i32 v_clone;
-    vector_i32_init(&v_clone);
+    vector_i32_init(&v_clone, NULL);
 
     struct vector_i32 w;
-    vector_i32_init(&w);
+    vector_i32_init(&w, NULL);
 
     struct vector_i32 w_clone;
-    vector_i32_init(&w_clone);
+    vector_i32_init(&w_clone, NULL);
 
     vector_i32_push_by_value(&v, 1);
     vector_i32_push_by_value(&v, 2);
@@ -295,6 +300,21 @@ static void swap_test(void) {
     vector_i32_free(&w_clone);
 }
 
+DECLARE_VECTOR(of_vectors, struct vector_i32)
+IMPLEMENT_VECTOR(of_vectors, struct vector_i32)
+
+static void matrix_test(void) {
+    struct vector_of_vectors m = vector_of_vectors_make(&vector_i32_free);
+
+    vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
+    vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
+    vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
+
+    vector_i32_push_by_value(vector_of_vectors_at(&m, 0), 3);
+
+    vector_of_vectors_free(&m);
+}
+
 int main(void) {
     build_test();
     build_make_test();
@@ -308,5 +328,6 @@ int main(void) {
     pop_test();
     swap_test();
     for_each_test();
+    matrix_test();
     return 0;
 }
