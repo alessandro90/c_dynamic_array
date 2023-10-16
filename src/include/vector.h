@@ -13,54 +13,54 @@
         type value;                   \
     }
 
-#define DECLARE_VECTOR(type_name, type)                                                           \
-    struct vector_##type_name {                                                                   \
-        size_t size;                                                                              \
-        size_t capacity;                                                                          \
-        void (*free_item)(type *);                                                                \
-        type *data;                                                                               \
-    };                                                                                            \
-                                                                                                  \
-    DEFINE_MAYBE(vector_##type_name, struct vector_##type_name);                                  \
-                                                                                                  \
-    struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *));               \
-                                                                                                  \
-    void vector_##type_name##_init(struct vector_##type_name *vector, void (*free_item)(type *)); \
-                                                                                                  \
-    bool vector_##type_name##_is_empty(struct vector_##type_name const *vector);                  \
-                                                                                                  \
-    size_t vector_##type_name##_len(struct vector_##type_name const *vector);                     \
-                                                                                                  \
-    size_t vector_##type_name##_cap(struct vector_##type_name const *vector);                     \
-                                                                                                  \
-    type *vector_##type_name##_at(struct vector_##type_name const *vector, size_t n);             \
-                                                                                                  \
-    void vector_##type_name##_free(struct vector_##type_name *vector);                            \
-                                                                                                  \
-    bool vector_##type_name##_reserve(struct vector_##type_name *vector, size_t n);               \
-                                                                                                  \
-    bool vector_##type_name##_clone(                                                              \
-        struct vector_##type_name *dst,                                                           \
-        struct vector_##type_name const *src);                                                    \
-                                                                                                  \
-    bool vector_##type_name##_equal(struct vector_##type_name const *left,                        \
-                                    struct vector_##type_name const *right);                      \
-                                                                                                  \
-    bool vector_##type_name##_push(struct vector_##type_name *vector, type const *v);             \
-    bool vector_##type_name##_push_by_value(struct vector_##type_name *vector, type v);           \
-                                                                                                  \
-    type *vector_##type_name##_pop(struct vector_##type_name *vector);                            \
-                                                                                                  \
-    type *vector_##type_name##_last(struct vector_##type_name *vector);                           \
-    type *vector_##type_name##_data(struct vector_##type_name *vector);                           \
-    void vector_##type_name##_swap(struct vector_##type_name *a,                                  \
-                                   struct vector_##type_name *b);                                 \
-    bool vector_##type_name##_resize(struct vector_##type_name *vector, size_t s);                \
-    type *vector_##type_name##_begin(struct vector_##type_name *vector);                          \
-    type *vector_##type_name##_end(struct vector_##type_name *vector);                            \
-    void vector_##type_name##_erase_at(struct vector_##type_name *vector, size_t n);              \
-    bool vector_##type_name##_shrink(struct vector_##type_name *vector);                          \
-    struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector);
+#define DECLARE_VECTOR(type_name, type)                                                                 \
+    struct vector_##type_name {                                                                         \
+        size_t size;                                                                                    \
+        size_t capacity;                                                                                \
+        void (*free_item)(type *);                                                                      \
+        type *data;                                                                                     \
+    };                                                                                                  \
+                                                                                                        \
+    DEFINE_MAYBE(vector_##type_name, struct vector_##type_name);                                        \
+                                                                                                        \
+    struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *));                     \
+                                                                                                        \
+    void vector_##type_name##_init(struct vector_##type_name *vector, void (*free_item)(type *));       \
+                                                                                                        \
+    bool vector_##type_name##_is_empty(struct vector_##type_name const *vector);                        \
+                                                                                                        \
+    size_t vector_##type_name##_len(struct vector_##type_name const *vector);                           \
+                                                                                                        \
+    size_t vector_##type_name##_cap(struct vector_##type_name const *vector);                           \
+                                                                                                        \
+    type *vector_##type_name##_at(struct vector_##type_name const *vector, size_t n);                   \
+                                                                                                        \
+    void vector_##type_name##_free(struct vector_##type_name *vector);                                  \
+                                                                                                        \
+    bool vector_##type_name##_reserve(struct vector_##type_name *vector, size_t n);                     \
+                                                                                                        \
+    bool vector_##type_name##_clone(                                                                    \
+        struct vector_##type_name *dst,                                                                 \
+        struct vector_##type_name const *src);                                                          \
+                                                                                                        \
+    bool vector_##type_name##_equal(struct vector_##type_name const *left,                              \
+                                    struct vector_##type_name const *right);                            \
+                                                                                                        \
+    bool vector_##type_name##_push(struct vector_##type_name *vector, type const *v);                   \
+    bool vector_##type_name##_push_by_value(struct vector_##type_name *vector, type v);                 \
+                                                                                                        \
+    type *vector_##type_name##_pop(struct vector_##type_name *vector);                                  \
+                                                                                                        \
+    type *vector_##type_name##_last(struct vector_##type_name *vector);                                 \
+    type *vector_##type_name##_data(struct vector_##type_name *vector);                                 \
+    void vector_##type_name##_swap(struct vector_##type_name *a, struct vector_##type_name *b);         \
+    bool vector_##type_name##_resize(struct vector_##type_name *vector, size_t s);                      \
+    type *vector_##type_name##_begin(struct vector_##type_name *vector);                                \
+    type *vector_##type_name##_end(struct vector_##type_name *vector);                                  \
+    void vector_##type_name##_erase_at(struct vector_##type_name *vector, size_t n);                    \
+    bool vector_##type_name##_shrink(struct vector_##type_name *vector);                                \
+    struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector); \
+    type *vector_##type_name##_find(struct vector_##type_name *vector, bool (*is_match)(type const *));
 
 
 #define IMPLEMENT_VECTOR(type_name, type)                                                                \
@@ -167,8 +167,7 @@
     type *vector_##type_name##_data(struct vector_##type_name *vector) {                                 \
         return vector->data;                                                                             \
     }                                                                                                    \
-    void vector_##type_name##_swap(struct vector_##type_name *a,                                         \
-                                   struct vector_##type_name *b) {                                       \
+    void vector_##type_name##_swap(struct vector_##type_name *a, struct vector_##type_name *b) {         \
         {                                                                                                \
             type *temp = a->data;                                                                        \
             a->data = b->data;                                                                           \
@@ -222,6 +221,14 @@
             return (struct Maybe_vector_##type_name){.has_value = false};                                \
         }                                                                                                \
         return (struct Maybe_vector_##type_name){.has_value = true, .value = w};                         \
+    }                                                                                                    \
+    type *vector_##type_name##_find(struct vector_##type_name *vector, bool (*is_match)(type const *)) { \
+        for (type *item = vector_##type_name##_begin(vector);                                            \
+             item != vector_##type_name##_end(vector);                                                   \
+             ++item) {                                                                                   \
+            if (is_match(item)) { return item; }                                                         \
+        }                                                                                                \
+        return NULL;                                                                                     \
     }
 
 #endif

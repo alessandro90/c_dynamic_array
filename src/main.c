@@ -1,11 +1,5 @@
-#include "include/vector.h"
-
-#include <stdio.h>
-
-DECLARE_VECTOR(int, int)
-
-IMPLEMENT_VECTOR(int, int)
+#include <stdlib.h>
 
 int main(void) {
-    return 0;
+    return EXIT_SUCCESS;
 }

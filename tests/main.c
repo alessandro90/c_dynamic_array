@@ -379,6 +379,27 @@ static void from_test(void) {
     vector_i32_free(&maybew.value);
 }
 
+static _Bool get_3(int32_t const *item) {
+    return *item == 3;
+}
+
+static _Bool get_100(int32_t const *item) {
+    return *item == 100;  // NOLINT
+}
+
+static void find_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+    vector_i32_push_by_value(&v, 4);
+
+    assert(*vector_i32_find(&v, &get_3) == 3);
+
+    assert(vector_i32_find(&v, &get_100) == NULL);
+    vector_i32_free(&v);
+}
+
 DECLARE_VECTOR(of_vectors, struct vector_i32)
 IMPLEMENT_VECTOR(of_vectors, struct vector_i32)
 
@@ -420,6 +441,7 @@ int main(void) {
     shrink_test();
     erase_at_test();
     from_test();
+    find_test();
     matrix_test();
     return 0;
 }
