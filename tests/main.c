@@ -3,15 +3,14 @@
 #endif
 
 #include "assert.h"
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "../src/include/vector.h"
 
-DECLARE_VECTOR(i32, int32_t)
-
-IMPLEMENT_VECTOR(i32, int32_t)
+DECLARE_AND_IMPLEMENT_VECTOR(i32, int32_t)
+DECLARE_AND_IMPLEMENT_VECTOR(intptr, int32_t *)
+DECLARE_AND_IMPLEMENT_VECTOR(of_vectors, struct vector_i32)
 
 static void build_test(void) {
     struct vector_i32 v;
@@ -379,11 +378,11 @@ static void from_test(void) {
     vector_i32_free(&maybew.value);
 }
 
-static _Bool get_3(int32_t const *item) {
-    return *item == 3;
+static bool get_3(int32_t const *item) {
+    return *item == 3;  // NOLINT
 }
 
-static _Bool get_100(int32_t const *item) {
+static bool get_100(int32_t const *item) {
     return *item == 100;  // NOLINT
 }
 
@@ -400,8 +399,60 @@ static void find_test(void) {
     vector_i32_free(&v);
 }
 
-DECLARE_VECTOR(of_vectors, struct vector_i32)
-IMPLEMENT_VECTOR(of_vectors, struct vector_i32)
+static void find_index_test(void) {
+    struct vector_i32 v = vector_i32_make(NULL);
+    vector_i32_push_by_value(&v, 1);
+    vector_i32_push_by_value(&v, 2);
+    vector_i32_push_by_value(&v, 3);
+    vector_i32_push_by_value(&v, 4);
+    {
+        struct Maybe_index const idx = vector_i32_find_index(&v, &get_3);
+        assert(idx.has_value);
+        assert(idx.value == 2);
+    }
+
+    {
+        struct Maybe_index const idx = vector_i32_find_index(&v, &get_100);
+        assert(!idx.has_value);
+    }
+    vector_i32_free(&v);
+}
+
+
+static int32_t *make_intptr(int32_t *const *i) {
+    if (i == NULL || *i == NULL) { return NULL; }
+    int32_t *j = malloc(sizeof(*i));
+    *j = **i;
+    return j;
+}
+
+static void free_i32(int32_t **i) {
+    if (i != NULL) { free(*i); }
+}
+
+static void clone_deep_test(void) {
+    struct vector_intptr v = vector_intptr_make(&free_i32);
+    {
+        int32_t *i = malloc(sizeof(int32_t));
+        *i = 1;
+        vector_intptr_push_by_value(&v, i);
+    }
+    {
+        int32_t *i = malloc(sizeof(int32_t));
+        *i = 2;
+        vector_intptr_push_by_value(&v, i);
+    }
+
+    struct vector_intptr w = vector_intptr_make(&free_i32);
+
+    assert(vector_intptr_clone_deep(&w, &v, &make_intptr));
+
+    assert(**vector_intptr_at(&v, 0) == **vector_intptr_at(&w, 0));
+    assert(**vector_intptr_at(&v, 1) == **vector_intptr_at(&w, 1));
+
+    vector_intptr_free(&v);
+    vector_intptr_free(&w);
+}
 
 static void matrix_test(void) {
     struct vector_of_vectors m = vector_of_vectors_make(&vector_i32_free);
@@ -411,17 +462,13 @@ static void matrix_test(void) {
     vector_i32_push_by_value(&v, 2);
     vector_i32_push_by_value(&v, 3);
 
-    struct Maybe_vector_i32 w = vector_i32_from(&v);
-    assert(w.has_value);
-
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
-    vector_of_vectors_push_by_value(&m, w.value);
+    vector_of_vectors_push_by_value(&m, v);
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
 
     assert(vector_i32_equal(vector_of_vectors_at(&m, 1), &v));
 
     vector_of_vectors_free(&m);
-    vector_i32_free(&v);
 }
 
 int main(void) {
@@ -442,6 +489,8 @@ int main(void) {
     erase_at_test();
     from_test();
     find_test();
+    find_index_test();
+    clone_deep_test();
     matrix_test();
     return 0;
 }
