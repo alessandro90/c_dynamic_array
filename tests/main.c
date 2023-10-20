@@ -141,6 +141,10 @@ static void clone_test(void) {
     vector_i32_free(&w);
 }
 
+static bool comp_i32(int32_t const *a, int32_t const *b) {
+    return *a == *b;  // NOLINT
+}
+
 static void equal_test(void) {
     {
         struct vector_i32 v;
@@ -154,7 +158,7 @@ static void equal_test(void) {
 
         assert(vector_i32_clone(&w, &v));
 
-        assert(vector_i32_equal(&v, &w));
+        assert(vector_i32_equal(&v, &w, &comp_i32));
 
         vector_i32_free(&v);
         vector_i32_free(&w);
@@ -172,7 +176,7 @@ static void equal_test(void) {
         vector_i32_push_by_value(&v, -1);
         vector_i32_push_by_value(&v, -1);
 
-        assert(!vector_i32_equal(&v, &w));
+        assert(!vector_i32_equal(&v, &w, &comp_i32));
 
         vector_i32_free(&v);
         vector_i32_free(&w);
@@ -189,7 +193,7 @@ static void equal_test(void) {
 
         vector_i32_push_by_value(&v, -1);
 
-        assert(!vector_i32_equal(&v, &w));
+        assert(!vector_i32_equal(&v, &w, &comp_i32));
 
         vector_i32_free(&v);
         vector_i32_free(&w);
@@ -218,20 +222,20 @@ static void pop_test(void) {
     vector_i32_push_by_value(&v, 4);
 
     {
-        int32_t const *x = vector_i32_pop(&v);
-        assert(*x == 4);
+        int32_t const x = vector_i32_pop(&v);
+        assert(x == 4);
     }
     {
-        int32_t const *x = vector_i32_pop(&v);
-        assert(*x == 3);
+        int32_t const x = vector_i32_pop(&v);
+        assert(x == 3);
     }
     {
-        int32_t const *x = vector_i32_pop(&v);
-        assert(*x == 2);
+        int32_t const x = vector_i32_pop(&v);
+        assert(x == 2);
     }
     {
-        int32_t const *x = vector_i32_pop(&v);
-        assert(*x == 1);
+        int32_t const x = vector_i32_pop(&v);
+        assert(x == 1);
     }
 
     vector_i32_free(&v);
@@ -290,8 +294,8 @@ static void swap_test(void) {
 
     vector_i32_swap(&v, &w);
 
-    assert(vector_i32_equal(&v, &w_clone));
-    assert(vector_i32_equal(&w, &v_clone));
+    assert(vector_i32_equal(&v, &w_clone, &comp_i32));
+    assert(vector_i32_equal(&w, &v_clone, &comp_i32));
 
     vector_i32_free(&v);
     vector_i32_free(&v_clone);
@@ -369,10 +373,10 @@ static void from_test(void) {
     vector_i32_push_by_value(&v, 3);
     vector_i32_push_by_value(&v, 4);
 
-    struct Maybe_vector_i32 maybew = vector_i32_from(&v);
+    struct Maybe_vector_i32 maybew = vector_i32_from(&v, NULL);
 
     assert(maybew.has_value);
-    assert(vector_i32_equal(&v, &maybew.value));
+    assert(vector_i32_equal(&v, &maybew.value, &comp_i32));
 
     vector_i32_free(&v);
     vector_i32_free(&maybew.value);
@@ -466,7 +470,7 @@ static void matrix_test(void) {
     vector_of_vectors_push_by_value(&m, v);
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
 
-    assert(vector_i32_equal(vector_of_vectors_at(&m, 1), &v));
+    assert(vector_i32_equal(vector_of_vectors_at(&m, 1), &v, &comp_i32));
 
     vector_of_vectors_free(&m);
 }

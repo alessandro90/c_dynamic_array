@@ -43,13 +43,14 @@
                                          type (*copy_item)(type const *));                                            \
                                                                                                                       \
     [[nodiscard]] bool vector_##type_name##_equal(struct vector_##type_name const *left,                              \
-                                                  struct vector_##type_name const *right);                            \
+                                                  struct vector_##type_name const *right,                             \
+                                                  bool (*comp)(type const *, type const *));                          \
                                                                                                                       \
     bool vector_##type_name##_push(struct vector_##type_name *vector, type const *v);                                 \
                                                                                                                       \
     bool vector_##type_name##_push_by_value(struct vector_##type_name *vector, type v);                               \
                                                                                                                       \
-    [[nodiscard]] type *vector_##type_name##_pop(struct vector_##type_name *vector);                                  \
+    [[nodiscard]] type vector_##type_name##_pop(struct vector_##type_name *vector);                                   \
                                                                                                                       \
     [[nodiscard]] type *vector_##type_name##_last(struct vector_##type_name *vector);                                 \
                                                                                                                       \
@@ -67,7 +68,8 @@
                                                                                                                       \
     bool vector_##type_name##_shrink(struct vector_##type_name *vector);                                              \
                                                                                                                       \
-    [[nodiscard]] struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector); \
+    [[nodiscard]] struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector,  \
+                                                                            type (*copy_item)(type const *));         \
                                                                                                                       \
     [[nodiscard]] type *vector_##type_name##_find(struct vector_##type_name *vector, bool (*is_match)(type const *)); \
                                                                                                                       \
@@ -153,9 +155,13 @@
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_equal(struct vector_##type_name const *left,                                  \
-                                    struct vector_##type_name const *right) {                               \
-        return left->size == right->size                                                                    \
-               && memcmp(left->data, right->data, left->size) == 0;                                         \
+                                    struct vector_##type_name const *right,                                 \
+                                    bool (*comp)(type const *a, type const *b)) {                           \
+        if (left->size != right->size) { return false; }                                                    \
+        for (size_t i = 0; i < left->size; ++i) {                                                           \
+            if (!comp(&left->data[i], &right->data[i])) { return false; }                                   \
+        }                                                                                                   \
+        return true;                                                                                        \
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_push(struct vector_##type_name *vector, type const *v) {                      \
@@ -180,12 +186,9 @@
         return vector_##type_name##_push(vector, &v);                                                       \
     }                                                                                                       \
                                                                                                             \
-    type *vector_##type_name##_pop(struct vector_##type_name *vector) {                                     \
-        if (vector->size == 0) {                                                                            \
-            return NULL;                                                                                    \
-        }                                                                                                   \
+    type vector_##type_name##_pop(struct vector_##type_name *vector) {                                      \
         --vector->size;                                                                                     \
-        return vector->data + vector->size;                                                                 \
+        return vector->data[vector->size];                                                                  \
     }                                                                                                       \
                                                                                                             \
     size_t vector_##type_name##_len(struct vector_##type_name const *vector) {                              \
@@ -264,9 +267,10 @@
         return true;                                                                                        \
     }                                                                                                       \
                                                                                                             \
-    struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector) {    \
+    struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector,      \
+                                                              type (*copy_item)(type const *)) {            \
         struct vector_##type_name w = vector_##type_name##_make(vector->free_item);                         \
-        if (!vector_##type_name##_clone(&w, vector)) {                                                      \
+        if (!vector_##type_name##_clone_deep(&w, vector, copy_item)) {                                      \
             return (struct Maybe_vector_##type_name){.has_value = false};                                   \
         }                                                                                                   \
         return (struct Maybe_vector_##type_name){.has_value = true, .value = w};                            \
