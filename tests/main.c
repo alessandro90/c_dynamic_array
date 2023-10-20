@@ -430,9 +430,7 @@ static int32_t *make_intptr(int32_t *const *i) {
     return j;
 }
 
-static void free_i32(int32_t **i) {
-    if (i != NULL) { free(*i); }
-}
+static void free_i32(int32_t **i) { free(*i); }
 
 static void clone_deep_test(void) {
     struct vector_intptr v = vector_intptr_make(&free_i32);
@@ -467,6 +465,8 @@ static void matrix_test(void) {
     vector_i32_push_by_value(&v, 3);
 
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
+    // Ownership goes to vac of vec because push just make a
+    // shallow copy of v
     vector_of_vectors_push_by_value(&m, v);
     vector_of_vectors_push_by_value(&m, vector_i32_make(NULL));
 

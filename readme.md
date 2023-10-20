@@ -56,7 +56,23 @@ double *w = vector_f64_at(0);
 // comp is a function of the type bool(*)(type const*, type const*) use to compare the elements
 bool vector_f64_equal(&v1, &v2, &comp);
 
-// Other functions -WIP-
+// Create a deep copy from a vector (the maybe type is declared alongside the vector)
+// The second argument is a pointer to function for the deep copy of the items.
+// If NULL the items are copied with memcpy
+Maybe_vector_f64 const mv = vector_f64_from(&v, NULL);
+if (ms.has_value) {
+    // do stuff with
+    mv.value; // == vector_f64
+}
+
+// Find a pointer to a given element satisfying a predicate or get NULL
+double const *p = vector_f64_find(&v, &greater_then_3); // greater_than_3 :: double const* -> bool
+
+// Find the index of a given element satisfying a predicate
+Maybe_index const mi = vector_f64_find_index(&v, &greater_then_3); // greater_than_3 :: double const* -> bool
+
+// Erase the n-th element and rearrange the items accordingly
+vector_f64_erase_at(&v, 2);
 
 // Free the memory
 vector_64_free(&v);
