@@ -33,12 +33,12 @@ The result is a new `struct` called `vector_f64`. All the functions for this typ
 struct vector_f64 v = vector_f64_make(NULL); // Argument is a function to free the vector elements or NULL if there is nothing to free
 
 // Reserve space for 10 doubles
-vector_64_reserve(&v, 10);
+vector_f64_reserve(&v, 10);
 
 // Push items (by pointer to avoid copies or directly by value)
 double const x = 1.;
 vector_f64_push(&v, &x);
-vector_f64_push_by_value(&v, &x);
+vector_f64_push_by_value(&v, x);
 
 // Pop an item. Note that popping from an empty vector is UB
 double const j = vector_f64_pop(&v);
