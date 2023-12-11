@@ -14,14 +14,18 @@
         size_t size;                                                                                                  \
         size_t capacity;                                                                                              \
         void (*free_item)(type *);                                                                                    \
+        void *(*allocator)(void *, size_t);                                                                           \
         type *data;                                                                                                   \
     };                                                                                                                \
                                                                                                                       \
     DEFINE_MAYBE(vector_##type_name, struct vector_##type_name);                                                      \
                                                                                                                       \
-    [[nodiscard]] struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *));                     \
+    [[nodiscard]] struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *),                      \
+                                                                      void *(*allocator)(void *, size_t));            \
                                                                                                                       \
-    void vector_##type_name##_init(struct vector_##type_name *vector, void (*free_item)(type *));                     \
+    void vector_##type_name##_init(struct vector_##type_name *vector,                                                 \
+                                   void (*free_item)(type *),                                                         \
+                                   void *(*allocator)(void *, size_t));                                               \
                                                                                                                       \
     [[nodiscard]] bool vector_##type_name##_is_empty(struct vector_##type_name const *vector);                        \
                                                                                                                       \
@@ -79,16 +83,20 @@
 
 #define IMPLEMENT_VECTOR(type_name, type)                                                                   \
                                                                                                             \
-    void vector_##type_name##_init(struct vector_##type_name *vector, void (*free_item)(type *)) {          \
+    void vector_##type_name##_init(struct vector_##type_name *vector,                                       \
+                                   void (*free_item)(type *),                                               \
+                                   void *(*allocator)(void *, size_t)) {                                    \
         vector->data = NULL;                                                                                \
         vector->size = 0;                                                                                   \
         vector->capacity = 0;                                                                               \
         vector->free_item = free_item;                                                                      \
+        vector->allocator = allocator != NULL ? allocator : &realloc;                                       \
     }                                                                                                       \
                                                                                                             \
-    struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *)) {                        \
+    struct vector_##type_name vector_##type_name##_make(void (*free_item)(type *),                          \
+                                                        void *(*allocator)(void *, size_t)) {               \
         struct vector_##type_name v;                                                                        \
-        vector_##type_name##_init(&v, free_item);                                                           \
+        vector_##type_name##_init(&v, free_item, allocator);                                                \
         return v;                                                                                           \
     }                                                                                                       \
                                                                                                             \
@@ -109,7 +117,7 @@
             }                                                                                               \
         }                                                                                                   \
         free(vector->data);                                                                                 \
-        vector_##type_name##_init(vector, vector->free_item);                                               \
+        vector_##type_name##_init(vector, vector->free_item, vector->allocator);                            \
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_reserve(struct vector_##type_name *vector, size_t n) {                        \
@@ -123,7 +131,7 @@
                 }                                                                                           \
             }                                                                                               \
         }                                                                                                   \
-        void *const new_ptr = realloc(vector->data, sizeof(type) * n);                                      \
+        void *const new_ptr = vector->allocator(vector->data, sizeof(type) * n);                            \
         if (new_ptr == NULL) {                                                                              \
             return false;                                                                                   \
         }                                                                                                   \
@@ -171,7 +179,7 @@
             return true;                                                                                    \
         }                                                                                                   \
         size_t const incr = vector->capacity == 0 ? 1U : (2 * vector->capacity);                            \
-        void *const new_ptr = realloc(vector->data, sizeof(type) * incr);                                   \
+        void *const new_ptr = vector->allocator(vector->data, sizeof(type) * incr);                         \
         if (new_ptr == NULL) {                                                                              \
             return false;                                                                                   \
         }                                                                                                   \
@@ -258,7 +266,7 @@
                                                                                                             \
     bool vector_##type_name##_shrink(struct vector_##type_name *vector) {                                   \
         if (vector->size == vector->capacity) { return true; }                                              \
-        void *const new_ptr = realloc(vector->data, sizeof(type) * vector->size);                           \
+        void *const new_ptr = vector->allocator(vector->data, sizeof(type) * vector->size);                 \
         if (new_ptr == NULL) {                                                                              \
             return false;                                                                                   \
         }                                                                                                   \
@@ -269,7 +277,7 @@
                                                                                                             \
     struct Maybe_vector_##type_name vector_##type_name##_from(struct vector_##type_name const *vector,      \
                                                               type (*copy_item)(type const *)) {            \
-        struct vector_##type_name w = vector_##type_name##_make(vector->free_item);                         \
+        struct vector_##type_name w = vector_##type_name##_make(vector->free_item, vector->allocator);      \
         if (!vector_##type_name##_clone_deep(&w, vector, copy_item)) {                                      \
             return (struct Maybe_vector_##type_name){.has_value = false};                                   \
         }                                                                                                   \
