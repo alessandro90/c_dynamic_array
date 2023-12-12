@@ -236,6 +236,11 @@
             a->free_item = b->free_item;                                                                    \
             b->free_item = temp;                                                                            \
         }                                                                                                   \
+        {                                                                                                   \
+            void *(*temp)(void *) = a->allocator;                                                           \
+            a->allocator = b->allocator;                                                                    \
+            b->allocator = temp;                                                                            \
+        }                                                                                                   \
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_resize(struct vector_##type_name *vector, size_t s) {                         \
