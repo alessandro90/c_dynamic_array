@@ -237,7 +237,7 @@
             b->free_item = temp;                                                                            \
         }                                                                                                   \
         {                                                                                                   \
-            void *(*temp)(void *) = a->allocator;                                                           \
+            void *(*temp)(void *, size_t) = a->allocator;                                                   \
             a->allocator = b->allocator;                                                                    \
             b->allocator = temp;                                                                            \
         }                                                                                                   \
