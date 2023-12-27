@@ -215,10 +215,9 @@
     }                                                                                                       \
                                                                                                             \
     void vector_##type_name##_swap(struct vector_##type_name *a, struct vector_##type_name *b) {            \
-        struct vector_##type_name temp = {0};                                                               \
-        memcpy(&temp, a, sizeof(temp));                                                                     \
-        memcpy(a, b, sizeof(temp));                                                                         \
-        memcpy(b, &temp, sizeof(temp));                                                                     \
+        struct vector_##type_name temp = *a;                                                                \
+        *a = *b;                                                                                            \
+        *b = temp;                                                                                          \
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_resize(struct vector_##type_name *vector, size_t s) {                         \
