@@ -215,31 +215,10 @@
     }                                                                                                       \
                                                                                                             \
     void vector_##type_name##_swap(struct vector_##type_name *a, struct vector_##type_name *b) {            \
-        {                                                                                                   \
-            type *temp = a->data;                                                                           \
-            a->data = b->data;                                                                              \
-            b->data = temp;                                                                                 \
-        }                                                                                                   \
-        {                                                                                                   \
-            size_t temp = a->size;                                                                          \
-            a->size = b->size;                                                                              \
-            b->size = temp;                                                                                 \
-        }                                                                                                   \
-        {                                                                                                   \
-            size_t temp = a->capacity;                                                                      \
-            a->capacity = b->capacity;                                                                      \
-            b->capacity = temp;                                                                             \
-        }                                                                                                   \
-        {                                                                                                   \
-            void (*temp)(type *) = a->free_item;                                                            \
-            a->free_item = b->free_item;                                                                    \
-            b->free_item = temp;                                                                            \
-        }                                                                                                   \
-        {                                                                                                   \
-            void *(*temp)(void *, size_t) = a->allocator;                                                   \
-            a->allocator = b->allocator;                                                                    \
-            b->allocator = temp;                                                                            \
-        }                                                                                                   \
+        struct vector_##type_name temp = {0};                                                               \
+        memcpy(&temp, a, sizeof(temp));                                                                     \
+        memcpy(a, b, sizeof(temp));                                                                         \
+        memcpy(b, &temp, sizeof(temp));                                                                     \
     }                                                                                                       \
                                                                                                             \
     bool vector_##type_name##_resize(struct vector_##type_name *vector, size_t s) {                         \
