@@ -7,7 +7,7 @@ C23 standard is required.
 
 It is just one single macro (2 macros actually, one for a declaration and one for a definition) of a C++ std::vector-like object. Each macro call defines a new vector type.
 
-### Exmaples
+### Examples
 
 To declare a new vector type containing doubles:
 
